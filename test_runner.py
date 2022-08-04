@@ -4,8 +4,8 @@ from mc_report.in_game_unittest_test import UnittestRunner
 from mc_report.markdown import Document
 from mc_report.coverage_test import CoverageTest
 
-# TESTS = [UnittestRunner(), CoverageTest()]
-TESTS = [CoverageTest()]
+TESTS = [UnittestRunner(), CoverageTest()]
+# TESTS = [CoverageTest()]
 
 def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description='Generate various stats on datapack functions')
