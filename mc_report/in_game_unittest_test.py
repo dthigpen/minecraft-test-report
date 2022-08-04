@@ -31,13 +31,13 @@ class UnittestRunner(DatapackTest):
         return 'Unit Tests'
 
     def run(self, datapack_dirs: list) -> list:
-        table = [['Datapack', '# Failed', '# Passed', '% Passed']]
-        fail_count = 0
-        pass_count = 0
+        header = ['Datapack', 'Failed', 'Passed', 'Skipped']
+        table = []
         passed = True
         for datapack_dir in datapack_dirs:
+            fail_count = 0
+            pass_count = 0
             mcfunctions = [path_to_function_call(p) for p in datapack_dir.glob('**/functions/test/**/test_*') if 'client' not in str(p) and 'unittest' not in p.parts and not p.name.startswith('_')]
-
             pwd=os.getenv('RCON_PWD')
             with rcon_client(self.host,pwd=pwd,port=self.port) as rcon:
                 rcon.command('reload')
@@ -51,8 +51,7 @@ class UnittestRunner(DatapackTest):
                     else:
                         fail_count += 1
                         passed = False
-                        # print(f'output: {output}')
             datapack = Datapack(datapack_dir)
-            percent = f'{round(pass_count / (pass_count+fail_count) * 100)}%' if pass_count + fail_count > 0 else '-'
-            table.append([datapack.name,fail_count, pass_count, percent])
+            table.append([datapack.name,fail_count, pass_count, 0])
+            table.insert(0, header)
         return (table, passed)

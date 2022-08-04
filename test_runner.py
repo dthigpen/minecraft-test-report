@@ -1,11 +1,11 @@
 import argparse
-from asyncore import write
 from pathlib import Path
 from mc_report.in_game_unittest_test import UnittestRunner
 from mc_report.markdown import Document
 from mc_report.coverage_test import CoverageTest
 
-TESTS = [UnittestRunner(), CoverageTest()]
+# TESTS = [UnittestRunner(), CoverageTest()]
+TESTS = [CoverageTest()]
 
 def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description='Generate various stats on datapack functions')
@@ -14,7 +14,7 @@ def get_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def write_table(doc: Document, table: list):
+def write_table(doc: Document, table: list[list]):
     doc.table_header(*table[0])
     for row in table[1:]:
         doc.table_row(*row)

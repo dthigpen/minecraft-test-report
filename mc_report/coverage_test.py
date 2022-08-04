@@ -8,7 +8,8 @@ class CoverageTest(DatapackTest):
         return 'Test Coverage'
 
     def run(self, datapack_dirs: list) -> list:
-        table = [['Datapack', 'Tested', 'Total', 'Percent']]
+        header = ['Datapack', 'Tested', 'Total', 'Percent']
+        table = []
         for datapack_dir in datapack_dirs:
             datapack = Datapack(datapack_dir)
             all_function_paths = set(datapack.get_functions())
@@ -38,9 +39,15 @@ class CoverageTest(DatapackTest):
             
             testable_count = len(test_function_paths)
             covered_count = len(called_from_tests)
-            percent = f'{round(covered_count / testable_count * 100)}%' if testable_count > 0 else '-'
+            percent = round(covered_count / testable_count * 100) if testable_count > 0 else None
             table.append([datapack.name, covered_count, testable_count, percent])
+        
+        table.sort(key=lambda row: row[-1] if row[-1] != None else -1, reverse=True)
         # TODO add an "All" row
+        # Add percent signs
+        for row in table:
+            row[-1] = f'{row[-1]}%' if row[-1] != None else '-'
+        table.insert(0,header)
         return table, True
 
 def called_in_file(call: str, file: Path):
