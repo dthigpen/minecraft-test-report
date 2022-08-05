@@ -31,12 +31,13 @@ class UnittestRunner(DatapackTest):
         return 'Unit Tests'
 
     def run(self, datapack_dirs: list) -> list:
-        header = ['Datapack', 'Failed', 'Passed', 'Skipped']
-        table = []
+        summary_header = ['Datapack', 'Failed', 'Passed', 'Skipped']
+        summary_table = []
         passed = True
         for datapack_dir in datapack_dirs:
             fail_count = 0
             pass_count = 0
+            skip_count = 0
             mcfunctions = [path_to_function_call(p) for p in datapack_dir.glob('**/functions/test/**/test_*') if 'client' not in str(p) and 'unittest' not in p.parts and not p.name.startswith('_')]
             pwd=os.getenv('RCON_PWD')
             with rcon_client(self.host,pwd=pwd,port=self.port) as rcon:
@@ -51,7 +52,9 @@ class UnittestRunner(DatapackTest):
                     else:
                         fail_count += 1
                         passed = False
-            datapack = Datapack(datapack_dir)
-            table.append([datapack.name,fail_count, pass_count, 0])
-            table.insert(0, header)
-        return (table, passed)
+            # only add entry if there was at least one test
+            if fail_count + pass_count + skip_count > 0:
+                datapack = Datapack(datapack_dir)
+                summary_table.append([datapack.name,fail_count, pass_count, 0])
+        summary_table.insert(0, summary_header)
+        return (summary_table, passed)

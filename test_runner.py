@@ -25,6 +25,7 @@ def run(datapack_paths: list[Path], output_file: Path, overwrite=True):
     open_mode = 'w' if overwrite else 'a+'
     with Document.open(output_file, open_mode) as doc:
         for test in TESTS:
+            print(f'Running test: {test.get_name()}')
             results_table, passed = test.run(datapack_paths)
             if not passed:
                 overall_pass = False
