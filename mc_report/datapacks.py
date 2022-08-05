@@ -17,7 +17,7 @@ class DatapackTest(ABC):
         pass
 
     @abstractmethod
-    def run(datapack_directories: list[Path]) -> tuple[list, bool]:
+    def run(datapack_directories: list[Path]) -> tuple[list, bool, list]:
         pass
 
 class DatapackException(Exception):

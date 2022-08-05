@@ -48,7 +48,7 @@ class CoverageTest(DatapackTest):
         for row in table:
             row[-1] = f'{row[-1]}%' if row[-1] != None else '-'
         table.insert(0,header)
-        return table, True
+        return (table, True, None)
 
 def called_in_file(call: str, file: Path):
     # check if mcfunction file has this call

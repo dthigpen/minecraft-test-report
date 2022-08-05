@@ -26,7 +26,7 @@ def run(datapack_paths: list[Path], output_file: Path, overwrite=True):
     with Document.open(output_file, open_mode) as doc:
         for test in TESTS:
             print(f'Running test: {test.get_name()}')
-            results_table, passed = test.run(datapack_paths)
+            results_table, passed, details_table = test.run(datapack_paths)
             if not passed:
                 overall_pass = False
             if not overwrite:
@@ -35,13 +35,10 @@ def run(datapack_paths: list[Path], output_file: Path, overwrite=True):
             doc.header3(f'{test.get_name()}')
             write_table(doc, results_table)
             doc.nl()
-            # doc.header3('Details')
-            # doc.collapsible_section_opening(coverage_summary.name)
-            # doc.write('Uncalled Functions:')
-            # if coverage_summary.data is not None:
-            #     for uncalled in coverage_summary.data:
-            #         doc.write(f' - {uncalled}')
-            # doc.collapsible_section_closing()
+            if details_table:
+                doc.collapsible_section_opening('Details')
+                write_table(doc, details_table)
+                doc.collapsible_section_closing()
     return overall_pass
 if __name__ == "__main__":
     args = get_args()
