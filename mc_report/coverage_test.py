@@ -8,8 +8,8 @@ class CoverageTest(DatapackTest):
         return 'Test Coverage'
 
     def run(self, datapack_dirs: list) -> list:
-        header = ['Datapack', 'Tested', 'Total', 'Percent']
-        table = []
+        summary_header = ['Datapack', 'Tested', 'Total', 'Percent']
+        summary_table = []
         for datapack_dir in datapack_dirs:
             datapack = Datapack(datapack_dir)
             all_function_paths = set(datapack.get_functions())
@@ -40,15 +40,15 @@ class CoverageTest(DatapackTest):
             testable_count = len(test_function_paths)
             covered_count = len(called_from_tests)
             percent = round(covered_count / testable_count * 100) if testable_count > 0 else None
-            table.append([datapack.name, covered_count, testable_count, percent])
+            summary_table.append([datapack.name, covered_count, testable_count, percent])
         
-        table.sort(key=lambda row: row[-1] if row[-1] != None else -1, reverse=True)
+        summary_table.sort(key=lambda row: row[-1] if row[-1] != None else -1, reverse=True)
         # TODO add an "All" row
         # Add percent signs
-        for row in table:
+        for row in summary_table:
             row[-1] = f'{row[-1]}%' if row[-1] != None else '-'
-        table.insert(0,header)
-        return (table, True, None)
+        summary_table.insert(0,summary_header)
+        return (summary_table, True, None)
 
 def called_in_file(call: str, file: Path):
     # check if mcfunction file has this call

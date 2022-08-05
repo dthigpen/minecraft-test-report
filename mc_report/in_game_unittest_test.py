@@ -55,8 +55,8 @@ class UnittestRunner(DatapackTest):
                         fail_paths.append(test_function)
                         passed = False
             fail_count = len(fail_paths)
-            pass_count = len(pass_count)
-            skip_count = len(skip_count)
+            pass_count = len(pass_paths)
+            skip_count = len(skip_paths)
             datapack_name = Datapack(datapack_dir).name
             # only add detail entry for failed or skipped tests
             if fail_count + skip_count > 0:
