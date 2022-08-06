@@ -10,6 +10,8 @@ class CoverageTest(DatapackTest):
     def run(self, datapack_dirs: list) -> list:
         summary_header = ['Datapack', 'Tested', 'Total', 'Percent']
         summary_table = []
+        details_header = ['Datapack', 'Uncalled']
+        details_table = []
         for datapack_dir in datapack_dirs:
             datapack = Datapack(datapack_dir)
             all_function_paths = set(datapack.get_functions())
@@ -36,7 +38,10 @@ class CoverageTest(DatapackTest):
                         called_from_tests.add(testable_path)
                         break
             uncalled_testables = test_function_paths.difference(called_from_tests)
-            
+            uncalled_str = ''
+            for f in [path_to_function_call(f) for f in uncalled_testables]:
+                uncalled_str += f'`{f}`<br/>'
+            details_table.append([datapack.name, uncalled_str])
             testable_count = len(test_function_paths)
             covered_count = len(called_from_tests)
             percent = round(covered_count / testable_count * 100) if testable_count > 0 else None
@@ -47,8 +52,13 @@ class CoverageTest(DatapackTest):
         # Add percent signs
         for row in summary_table:
             row[-1] = f'{row[-1]}%' if row[-1] != None else '-'
+
+        if not details_table:
+            details_table = None
+        else:
+            details_table.insert(0,details_header)
         summary_table.insert(0,summary_header)
-        return (summary_table, True, None)
+        return (summary_table, True, details_table)
 
 def called_in_file(call: str, file: Path):
     # check if mcfunction file has this call
