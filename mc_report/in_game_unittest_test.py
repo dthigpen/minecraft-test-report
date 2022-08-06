@@ -2,7 +2,7 @@
 from contextlib import contextmanager
 import os
 from pathlib import Path
-from .datapacks import Datapack, DatapackTest, path_to_function_call
+from .datapacks import Datapack, DatapackTest, list_to_table_cell, path_to_function_call
 
 from mctools import RCONClient
 
@@ -31,10 +31,8 @@ class UnittestRunner(DatapackTest):
         return 'Unit Tests'
 
     def run(self, datapack_dirs: list) -> list:
-        summary_header = ['Datapack', 'Failed', 'Passed', 'Skipped']
-        summary_table = []
-        details_header = ['Datapack','Failed','Skipped']
-        details_table = []
+        summary_table = [['Datapack', 'Failed', 'Passed', 'Skipped']]
+        details_table = [['Datapack','Failed','Skipped']]
         passed = True
         for datapack_dir in datapack_dirs:
             fail_paths = []
@@ -60,20 +58,11 @@ class UnittestRunner(DatapackTest):
             datapack_name = Datapack(datapack_dir).name
             # only add detail entry for failed or skipped tests
             if fail_count + skip_count > 0:
-                failed_str = ''
-                for f in fail_paths:
-                    failed_str += f'`{f}`<br/>'
-                skip_str = ''
-                for f in skip_paths:
-                    skip_str += f'`{f}`<br/>'
+                failed_str = list_to_table_cell([f'`{f}`' for f in fail_paths])
+                skip_str = list_to_table_cell([f'`{f}`' for f in skip_paths])
                 details_table.append([datapack_name, failed_str, skip_str])
             # only add entry if there was at least one test
             if fail_count + pass_count + skip_count > 0:
                 summary_table.append([datapack_name,fail_count, pass_count, 0])
         
-        if details_table:
-            details_table.insert(0,details_header)
-        else:
-            details_header = None
-        summary_table.insert(0, summary_header)
         return (summary_table, passed, details_table)

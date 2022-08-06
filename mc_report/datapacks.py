@@ -119,3 +119,11 @@ def function_call_to_path(datapack_path: Path, function_call: str) -> Path:
     file_ext = '.json' if is_tag else '.mcfunction'
     load_file = function_call[function_call.find(':') + 1:] + file_ext
     return datapack_path / 'data' / namespace / function_or_tag_dir / load_file
+
+def sort_table(table, sort_funct, reverse=True):
+    header = table.pop(0)
+    table.sort(key=sort_funct, reverse=reverse)
+    table.insert(0, header)
+
+def list_to_table_cell(items):
+    return f'<br/>'.join(items)
