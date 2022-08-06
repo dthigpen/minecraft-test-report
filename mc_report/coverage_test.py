@@ -37,7 +37,7 @@ class CoverageTest(DatapackTest):
                     if called_in_file(call, test_path):
                         called_from_tests.add(testable_path)
                         break
-            uncalled_testables = test_function_paths.difference(called_from_tests)
+            uncalled_testables = testable_function_paths.difference(called_from_tests)
             uncalled_str = ''
             for f in [path_to_function_call(f) for f in uncalled_testables]:
                 uncalled_str += f'`{f}`<br/>'
