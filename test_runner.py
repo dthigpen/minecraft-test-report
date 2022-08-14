@@ -4,7 +4,10 @@ from mc_report.in_game_unittest_test import UnittestRunner
 from mc_report.markdown import Document
 from mc_report.coverage_test import CoverageTest
 
-TESTS = [UnittestRunner(), CoverageTest()]
+# Include files in the "test" functions subdirectory that start with "test_"
+UNIT_TESTS_RE = r'.*/functions/test/(.*/)?test_[^/]*\.mcfunction'
+TESTS = [UnittestRunner(test_includes=[UNIT_TESTS_RE]),\
+    CoverageTest(test_includes=[UNIT_TESTS_RE,r'.*/functions/test/(.*/)?client_test_[^/]*\.mcfunction'])]
 
 def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description='Generate various stats on datapack functions')

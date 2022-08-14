@@ -1,8 +1,16 @@
 from pathlib import Path
-from .datapacks import Datapack, DatapackTest, list_to_table_cell, path_to_function_call, path_to_function_call, sort_table
+from .test_util import DatapackTest, get_functions, list_to_table_cell, path_to_function_call, path_to_function_call, sort_table
 
 
 class CoverageTest(DatapackTest):
+
+    def __init__(self, all_includes=None, all_excludes=None, test_includes=None, test_excludes=None) -> None:
+        super().__init__()
+        self.all_includes = all_includes
+        self.all_excludes = all_excludes
+        self.test_includes = test_includes
+        self.test_excludes = test_excludes
+
     @staticmethod
     def get_name() -> str:
         return 'Coverage Test'
@@ -11,9 +19,9 @@ class CoverageTest(DatapackTest):
         summary_table = [['Datapack', 'Tested', 'Total', 'Percent']]
         details_table = [['Datapack', 'Uncalled']]
         for datapack_dir in datapack_dirs:
-            datapack = Datapack(datapack_dir)
-            all_function_paths = set([p for p in datapack.get_functions() if 'client' not in str(p)])
-            test_function_paths = set([p for p in datapack.get_functions('test') if 'client' not in str(p)])
+
+            all_function_paths = set([p for p in get_functions(datapack_dir,includes=self.all_includes,excludes=self.all_excludes)])
+            test_function_paths = set([p for p in get_functions(datapack_dir,includes=self.test_includes,excludes=self.test_excludes)])
             non_test_functions_paths = all_function_paths.difference(test_function_paths)
             testable_function_paths = set()  # non test functions not called in other non test functions
             for non_test_path in non_test_functions_paths:
@@ -35,19 +43,15 @@ class CoverageTest(DatapackTest):
                         called_from_tests.add(testable_path)
                         break
             uncalled_testables = testable_function_paths.difference(called_from_tests)
-            
+            datapack_name = str(datapack_dir.name).title()
             uncalled_str = list_to_table_cell([f'`{path_to_function_call(f)}`' for f in uncalled_testables])
-            details_table.append([datapack.name, uncalled_str])
+            details_table.append([datapack_name, uncalled_str])
             testable_count = len(test_function_paths)
             covered_count = len(called_from_tests)
             percent = round(covered_count / testable_count * 100) if testable_count > 0 else None
-            summary_table.append([datapack.name, covered_count, testable_count, percent])
+            summary_table.append([datapack_name, covered_count, testable_count, percent])
         sort_table(summary_table, lambda row: row[-1] if row[-1] != None else -1, reverse=True)
         # TODO add an "All" row
-        # Add percent signs
-        for row in summary_table:
-            row[-1] = f'{row[-1]}%' if row[-1] != None else '-'
-
         return (summary_table, True, details_table)
 
 def called_in_file(call: str, file: Path):
