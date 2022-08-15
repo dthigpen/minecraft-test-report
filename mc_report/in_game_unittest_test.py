@@ -3,6 +3,7 @@ from contextlib import contextmanager
 import os
 from pathlib import Path
 import re
+from time import sleep
 from .test_util import DatapackTest, get_functions, list_to_table_cell, path_to_function_call, sort_table
 
 from mctools import RCONClient
@@ -49,13 +50,29 @@ class UnittestRunner(DatapackTest):
                 for test_function in mcfunctions:
                     test_cmd = f'function {test_function}'
                     rcon.command(test_cmd)
-                    verify_cmd = 'scoreboard players get $passed unittest'
+                    verify_cmd = 'scoreboard players get $status unittest'
                     output = rcon.command(verify_cmd)
-                    if '$passed has 1' in output:
+                    if '$status has 1' in output:
                         pass_paths.append(test_function)
                     else:
-                        fail_paths.append(test_function)
-                        passed = False
+                        passes_test = False
+                        timeout_count = 5
+                        while '$status has 2' in output or '$status has 3':
+                            # TODO make this a parameter
+                            sleep(5)
+                            output = rcon.command(verify_cmd)
+                            timeout_count -= 1
+                            if '$status has 1' in output:
+                                passes_test = True
+                                break
+                            elif timeout_count <= 0:
+                                break
+                        if passes_test:
+                            pass_paths.append(test_function)
+                        else:
+                            fail_paths.append(test_function)
+                            passed = False
+
             fail_count = len(fail_paths)
             pass_count = len(pass_paths)
             skip_count = len(skip_paths)
