@@ -22,17 +22,27 @@ def rcon_client(host, port=DEFAULT_PORT, pwd=None):
 
 
 
-
 class UnittestRunner(DatapackTest):
-    def __init__(self, host='localhost', port=DEFAULT_PORT, test_includes=None, test_excludes=None):
+    def __init__(self, host='localhost', port=DEFAULT_PORT, test_includes=None, test_excludes=None, test_content_include_regex=None, test_content_exclude_regex=None):
         self.host=host
         self.port=port
         self.test_includes=test_includes
         self.test_excludes=test_excludes
+        self.test_content_include_regex=test_content_include_regex
+        self.test_content_exclude_regex=test_content_exclude_regex
 
     @staticmethod
     def get_name() -> str:
         return 'Unit Tests'
+
+    @staticmethod
+    def _passes_content_filter(content: str, include_re: str, exclude_re: str) -> bool:
+        # check include
+        passes = include_re is None or re.match(include_re, content)
+        # check exclude
+        passes = passes and (exclude_re is None or not re.match(exclude_re, content))
+        return passes
+
 
     def run(self, datapack_dirs: list) -> list:
         summary_table = [['Datapack', 'Failed', 'Passed', 'Skipped']]
@@ -43,7 +53,8 @@ class UnittestRunner(DatapackTest):
             pass_paths = []
             skip_paths = []
             mcfunction_paths = get_functions(datapack_dir, self.test_includes, self.test_excludes)
-            mcfunctions = [path_to_function_call(p) for p in mcfunction_paths]
+
+            mcfunctions = [path_to_function_call(p) for p in mcfunction_paths if UnittestRunner._passes_content_filter(p.read_text(), self.test_content_include_regex, self.test_content_exclude_regex)]
             pwd=os.getenv('RCON_PWD')
             with rcon_client(self.host,pwd=pwd,port=self.port) as rcon:
                 rcon.command('reload')
@@ -56,8 +67,9 @@ class UnittestRunner(DatapackTest):
                         pass_paths.append(test_function)
                     else:
                         passes_test = False
-                        timeout_count = 5
-                        while '$status has 2' in output or '$status has 3':
+                        timeout_count = 3
+                        print(f'test: {test_function} output: {output}')
+                        while '$status has 2' in output or '$status has 3' in output:
                             # TODO make this a parameter
                             sleep(5)
                             output = rcon.command(verify_cmd)
@@ -83,7 +95,7 @@ class UnittestRunner(DatapackTest):
                 skip_str = list_to_table_cell([f'`{f}`' for f in skip_paths])
                 details_table.append([datapack_name, failed_str, skip_str])
             # only add entry if there was at least one test
-            if True or fail_count + pass_count + skip_count > 0:
+            if fail_count + pass_count + skip_count > 0:
                 summary_table.append([datapack_name,fail_count, pass_count, 0])
             sort_table(summary_table, lambda row: row[1])
         return (summary_table, passed, details_table)
