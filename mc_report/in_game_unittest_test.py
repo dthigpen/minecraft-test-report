@@ -38,9 +38,9 @@ class UnittestRunner(DatapackTest):
     @staticmethod
     def _passes_content_filter(content: str, include_re: str, exclude_re: str) -> bool:
         # check include
-        passes = include_re is None or re.match(include_re, content)
+        passes = include_re is None or re.search(include_re, content)
         # check exclude
-        passes = passes and (exclude_re is None or not re.match(exclude_re, content))
+        passes = passes and (exclude_re is None or not re.search(exclude_re, content))
         return passes
 
 
@@ -59,6 +59,7 @@ class UnittestRunner(DatapackTest):
             with rcon_client(self.host,pwd=pwd,port=self.port) as rcon:
                 rcon.command('reload')
                 for test_function in mcfunctions:
+                    print(f'Running {test_function}')
                     test_cmd = f'function {test_function}'
                     rcon.command(test_cmd)
                     verify_cmd = 'scoreboard players get $status unittest'
