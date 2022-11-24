@@ -58,7 +58,7 @@ class UnittestRunner(DatapackTest):
             pwd=os.getenv('RCON_PWD')
             with rcon_client(self.host,pwd=pwd,port=self.port) as rcon:
                 rcon.command('reload')
-                rcom.command('player Steve spawn')
+                rcon.command('player Steve spawn')
                 for test_function in mcfunctions:
                     print(f'Running {test_function}')
                     test_cmd = f'execute as Steve at @s run function {test_function}'
