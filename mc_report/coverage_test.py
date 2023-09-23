@@ -23,26 +23,26 @@ class CoverageTest(DatapackTest):
             all_function_paths = set([p for p in get_functions(datapack_dir,includes=self.all_includes,excludes=self.all_excludes)])
             test_function_paths = set([p for p in get_functions(datapack_dir,includes=self.test_includes,excludes=self.test_excludes)])
             non_test_functions_paths = all_function_paths.difference(test_function_paths)
-            testable_function_paths = set()  # non test functions not called in other non test functions
+            paths_called_in_another_function = set()  # non test functions not called in other non test functions
             for non_test_path in non_test_functions_paths:
                 call = path_to_function_call(non_test_path)
-                # look through all non-test function    s to eliminate from testable pool
+                # look through all non-test functions to eliminate from testable pool
                 for p in non_test_functions_paths:
                     # skip own file
-                    if call != path_to_function_call(p):
+                    if call == path_to_function_call(p):
                         continue
-                    # check if mcfunction file has this call
                     if called_in_file(call, p):
-                        testable_function_paths.add(non_test_path)
+                        paths_called_in_another_function.add(non_test_path)
                         break
+            paths_not_called_in_another_function = non_test_functions_paths.difference(paths_called_in_another_function)
             called_from_tests = set()
-            for testable_path in testable_function_paths:
+            for testable_path in paths_not_called_in_another_function:
                 call = path_to_function_call(testable_path)
                 for test_path in test_function_paths:
                     if called_in_file(call, test_path):
                         called_from_tests.add(testable_path)
                         break
-            uncalled_testables = testable_function_paths.difference(called_from_tests)
+            uncalled_testables = paths_not_called_in_another_function.difference(called_from_tests)
             datapack_name = str(datapack_dir.name).title()
             uncalled_str = list_to_table_cell([f'`{path_to_function_call(f)}`' for f in uncalled_testables])
             details_table.append([datapack_name, uncalled_str])

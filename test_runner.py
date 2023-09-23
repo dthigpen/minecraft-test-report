@@ -6,7 +6,8 @@ from mc_report.markdown import Document
 from mc_report.coverage_test import CoverageTest
 
 # Include files in the "test" functions subdirectory that start with "test_"
-UNIT_TESTS_RE = r'.*/functions/test/(.*/)?test_[^/]*\.mcfunction'
+# UNIT_TESTS_RE = r'.*/functions/test/(.*/)?test_[^/]*\.mcfunction'
+UNIT_TESTS_RE = r'.*/functions/test/(.*/)?[^/]*\.mcfunction'
 # Exclude files that include client or client_test(s) 
 TESTS = [UnittestRunner(test_includes=[UNIT_TESTS_RE], test_content_include_regex=r'function unittest:api/test_suite/setup',test_content_exclude_regex=r'# ?ignore'),\
     CoverageTest(test_includes=[UNIT_TESTS_RE,r'.*/functions/test/(.*/)?client_test_[^/]*\.mcfunction'])]
